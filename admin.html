@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin &mdash; Punjabiforce</title>
+<meta name="description" content="Punjabiforce community management.">
+<link rel="icon" href="media/pf-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="index.html">
+      <img src="media/pf-icon.png" alt="" width="34" height="34">
+      <span>Punjabiforce</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="team.html">Team</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Community <span aria-hidden="true">&#9662;</span></button>
+        <div class="nav-drop-menu">
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </div>
+      <a href="volunteer.html">Volunteer</a>
+      <a href="contact.html">Contact</a>
+      <a href="dashboard.html" data-show="member" hidden>Dashboard</a>
+      <a href="admin.html" data-show="admin" hidden>Admin</a>
+      <a href="login.html" data-show="guest" hidden>Sign in</a>
+      <a href="#" data-signout data-show="member" hidden>Sign out</a>
+      <a href="join.html" class="nav-cta">Join us</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="page-hero">
+  <img class="watermark" src="media/pf-icon.png" alt="">
+  <div class="wrap">
+    <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Admin</p>
+    <h1>Community management.</h1>
+    <p class="lede">Applications, members, mentoring pairings and events.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="admin-tabs" role="tablist">
+      <button class="admin-tab active" data-panel="applications">Applications</button>
+      <button class="admin-tab" data-panel="members">Members</button>
+      <button class="admin-tab" data-panel="pairings">Pairings</button>
+      <button class="admin-tab" data-panel="feedback">Feedback</button>
+      <button class="admin-tab" data-panel="events">Events</button>
+    </div>
+
+    <div class="admin-panel active" id="panel-applications">
+      <div class="admin-bar">
+        <h2>Join requests</h2>
+        <select id="application-filter">
+          <option value="">All statuses</option>
+        </select>
+      </div>
+      <div class="table-scroll"><table class="data-table" id="applications-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-members">
+      <div class="admin-bar"><h2>Members</h2></div>
+      <div class="table-scroll"><table class="data-table" id="members-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-pairings">
+      <div class="admin-bar">
+        <h2>Mentorships</h2>
+        <button class="btn btn-primary" id="new-pairing-btn">New pairing</button>
+      </div>
+      <div class="table-scroll"><table class="data-table" id="pairings-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-feedback">
+      <div class="admin-bar"><h2>Feedback</h2></div>
+      <div class="table-scroll"><table class="data-table" id="feedback-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-events">
+      <div class="admin-bar">
+        <h2>Events</h2>
+        <button class="btn btn-primary" id="new-event-btn">Add event</button>
+      </div>
+      <div class="table-scroll"><table class="data-table" id="events-table"></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- Add / edit event dialog -->
+<div class="modal" id="event-modal" hidden>
+  <div class="modal-card">
+    <h2 id="event-modal-title">Add event</h2>
+    <form class="contact-form" id="event-form" novalidate>
+      <input type="hidden" name="id">
+      <label><span class="lbl">Title <span class="req">*</span></span>
+        <input type="text" name="title" required></label>
+      <label><span class="lbl">Community</span>
+        <input type="text" name="community" placeholder="e.g. Punjabiforce, SDG Jalandhar"></label>
+      <div class="form-row">
+        <label><span class="lbl">Date and time (UK) <span class="req">*</span></span>
+          <input type="datetime-local" name="event_datetime" required></label>
+        <label><span class="lbl">Status <span class="req">*</span></span>
+          <select name="status">
+            <option value="planning">Coming soon</option>
+            <option value="registration_open">Registration open</option>
+            <option value="completed">Completed</option>
+          </select></label>
+      </div>
+      <div class="form-row">
+        <label><span class="lbl">Where <span class="req">*</span></span>
+          <select name="where_type">
+            <option value="in_person">In person</option>
+            <option value="virtual">Virtual</option>
+          </select></label>
+        <label><span class="lbl">Location</span>
+          <input type="text" name="location" placeholder="e.g. London, or Zoom"></label>
+      </div>
+      <label><span class="lbl">Summary</span>
+        <textarea name="summary" rows="3"></textarea></label>
+      <label><span class="lbl">Image URL</span>
+        <input type="text" name="image_url" placeholder="https://... or media/file.jpg"></label>
+      <label><span class="lbl">Registration URL</span>
+        <input type="url" name="registration_url" placeholder="https://..."></label>
+      <label><span class="lbl">Recording URL</span>
+        <input type="url" name="recording_url" placeholder="https://..."></label>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Save event</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+      <p class="form-status" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<!-- New pairing dialog -->
+<div class="modal" id="pairing-modal" hidden>
+  <div class="modal-card">
+    <h2>Create a pairing</h2>
+    <p class="muted-note">Pick a mentee and a mentor. A mentee can only have one
+    live mentorship at a time.</p>
+    <form class="contact-form" id="pairing-form" novalidate>
+      <label><span class="lbl">Mentee</span>
+        <select name="mentee_id" required><option value="">Select a mentee</option></select>
+      </label>
+      <label><span class="lbl">Mentor</span>
+        <select name="mentor_id" required><option value="">Select a mentor</option></select>
+      </label>
+      <label><span class="lbl">Expertise area</span>
+        <select name="expertise_area_id"><option value="">Not specified</option></select>
+      </label>
+      <label><span class="lbl">Focus for this mentorship</span>
+        <textarea name="focus_area" rows="3" placeholder="What they'll be working on"></textarea>
+      </label>
+      <label><span class="lbl">Admin notes <small>(never shown to either party)</small></span>
+        <textarea name="admin_notes" rows="2"></textarea>
+      </label>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Create pairing</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+      <p class="form-status" role="status"></p>
+    </form>
+  </div>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-brand" href="index.html">
+        <img src="media/pf-icon.png" alt="" width="30" height="30">
+        <span>Punjabiforce</span>
+      </a>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h2>Community</h2>
+          <a href="team.html">Team</a>
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="volunteer.html">Volunteer with us</a>
+        </div>
+        <div class="foot-col">
+          <h2>Get in touch</h2>
+          <a href="contact.html">Contact</a>
+          <a href="join.html">Join the community</a>
+          <a href="policies.html">Policies &amp; privacy</a>
+        </div>
+        <div class="foot-col">
+          <h2>Connect</h2>
+          <a href="https://www.linkedin.com/company/punjabiforcenet">LinkedIn</a>
+          <a href="https://www.facebook.com/punjabiforcenet/">Facebook</a>
+          <a href="https://www.instagram.com/punjabiforcenet">Instagram</a>
+          <a href="https://x.com/punjabiforcenet">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span data-year>2026</span> Punjabiforce. One Punjab. One Force.
+        <span class="foot-credit">&middot; Designed by <a href="https://ksm1313live.netlify.app/" target="_blank" rel="noopener">Kam</a></span></span>
+      <span>@punjabiforcenet</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

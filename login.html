@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in &mdash; Punjabiforce</title>
+<meta name="description" content="Member sign in for Punjabiforce.">
+<link rel="icon" href="media/pf-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="index.html">
+      <img src="media/pf-icon.png" alt="" width="34" height="34">
+      <span>Punjabiforce</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="team.html">Team</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Community <span aria-hidden="true">&#9662;</span></button>
+        <div class="nav-drop-menu">
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </div>
+      <a href="volunteer.html">Volunteer</a>
+      <a href="contact.html">Contact</a>
+      <a href="dashboard.html" data-show="member" hidden>Dashboard</a>
+      <a href="admin.html" data-show="admin" hidden>Admin</a>
+      <a href="login.html" data-show="guest" hidden>Sign in</a>
+      <a href="#" data-signout data-show="member" hidden>Sign out</a>
+      <a href="join.html" class="nav-cta">Join us</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="page-hero">
+  <img class="watermark" src="media/pf-icon.png" alt="">
+  <div class="wrap">
+    <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Member sign in</p>
+    <h1>Welcome back.</h1>
+    <p class="lede">Sign in to see who you're paired with. We'll email you a link, so there's no password to remember.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap narrow-col">
+    <form class="contact-form reveal" id="login-form" novalidate>
+      <label><span class="lbl">Email address</span>
+        <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required>
+      </label>
+      <button class="btn btn-primary" type="submit">Email me a sign-in code &rarr;</button>
+      <p class="form-status" role="status"></p>
+    </form>
+
+    <form class="contact-form" id="code-form" novalidate hidden>
+      <p class="muted-lede" id="code-sent-to"></p>
+      <label><span class="lbl">Sign-in code</span>
+        <input type="text" name="token" inputmode="numeric" autocomplete="one-time-code"
+               pattern="[0-9]*" maxlength="10" placeholder="123456" required>
+      </label>
+      <button class="btn btn-primary" type="submit">Sign in &rarr;</button>
+      <p class="form-status" role="status"></p>
+      <p class="muted-note"><a href="#" id="code-restart">Use a different email</a> or check your junk folder if it hasn't arrived.</p>
+    </form>
+
+    <p class="muted-note">
+      Not a member yet? <a href="join.html">Join the community</a> first.
+      Sign-in is for members who've been set up by the team.
+    </p>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-brand" href="index.html">
+        <img src="media/pf-icon.png" alt="" width="30" height="30">
+        <span>Punjabiforce</span>
+      </a>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h2>Community</h2>
+          <a href="team.html">Team</a>
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="volunteer.html">Volunteer with us</a>
+        </div>
+        <div class="foot-col">
+          <h2>Get in touch</h2>
+          <a href="contact.html">Contact</a>
+          <a href="join.html">Join the community</a>
+          <a href="policies.html">Policies &amp; privacy</a>
+        </div>
+        <div class="foot-col">
+          <h2>Connect</h2>
+          <a href="https://www.linkedin.com/company/punjabiforcenet">LinkedIn</a>
+          <a href="https://www.facebook.com/punjabiforcenet/">Facebook</a>
+          <a href="https://www.instagram.com/punjabiforcenet">Instagram</a>
+          <a href="https://x.com/punjabiforcenet">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span data-year>2026</span> Punjabiforce. One Punjab. One Force.
+        <span class="foot-credit">&middot; Designed by <a href="https://ksm1313live.netlify.app/" target="_blank" rel="noopener">Kam</a></span></span>
+      <span>@punjabiforcenet</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

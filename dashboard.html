@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard &mdash; Punjabiforce</title>
+<meta name="description" content="Your Punjabiforce mentoring dashboard.">
+<link rel="icon" href="media/pf-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="index.html">
+      <img src="media/pf-icon.png" alt="" width="34" height="34">
+      <span>Punjabiforce</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="team.html">Team</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Community <span aria-hidden="true">&#9662;</span></button>
+        <div class="nav-drop-menu">
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </div>
+      <a href="volunteer.html">Volunteer</a>
+      <a href="contact.html">Contact</a>
+      <a href="dashboard.html" data-show="member" hidden>Dashboard</a>
+      <a href="admin.html" data-show="admin" hidden>Admin</a>
+      <a href="login.html" data-show="guest" hidden>Sign in</a>
+      <a href="#" data-signout data-show="member" hidden>Sign out</a>
+      <a href="join.html" class="nav-cta">Join us</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="page-hero">
+  <img class="watermark" src="media/pf-icon.png" alt="">
+  <div class="wrap">
+    <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your dashboard</p>
+    <h1 id="greeting">Welcome back.</h1>
+    <p class="lede" id="role-line"></p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div id="dash-loading" class="muted-note">Loading your details&hellip;</div>
+
+    <div id="mentee-block" hidden>
+      <div class="sec-head">
+        <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your mentor</p>
+        <h2>Who you're paired with.</h2>
+      </div>
+      <div id="mentee-pairing"></div>
+    </div>
+
+    <div id="mentor-block" hidden style="margin-top:56px">
+      <div class="sec-head">
+        <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your mentees</p>
+        <h2>People you're supporting.</h2>
+      </div>
+      <div id="mentor-pairings" class="team-grid"></div>
+    </div>
+
+    <div id="history-block" hidden style="margin-top:56px">
+      <div class="sec-head">
+        <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Previously</p>
+        <h2>Past mentorships.</h2>
+      </div>
+      <div class="event-list" id="history-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Feedback dialog -->
+<div class="modal" id="feedback-modal" hidden>
+  <div class="modal-card">
+    <h2>How did it go?</h2>
+    <p class="muted-note" id="feedback-context"></p>
+    <form class="contact-form" id="feedback-form" novalidate>
+      <input type="hidden" name="mentorship_id">
+      <input type="hidden" name="role">
+      <label><span class="lbl">Overall, how useful was this mentorship?</span>
+        <select name="rating" required>
+          <option value="">Select a rating</option>
+          <option value="5">5 &mdash; Excellent</option>
+          <option value="4">4 &mdash; Good</option>
+          <option value="3">3 &mdash; Fine</option>
+          <option value="2">2 &mdash; Not great</option>
+          <option value="1">1 &mdash; Poor</option>
+        </select>
+      </label>
+      <label><span class="lbl">What went well, and what could be better?</span>
+        <textarea name="comments" rows="4"></textarea>
+      </label>
+      <label class="check">
+        <input type="checkbox" name="would_recommend">
+        <span>I'd recommend this pairing to others</span>
+      </label>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Submit feedback</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+      <p class="form-status" role="status"></p>
+    </form>
+  </div>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-brand" href="index.html">
+        <img src="media/pf-icon.png" alt="" width="30" height="30">
+        <span>Punjabiforce</span>
+      </a>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h2>Community</h2>
+          <a href="team.html">Team</a>
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="volunteer.html">Volunteer with us</a>
+        </div>
+        <div class="foot-col">
+          <h2>Get in touch</h2>
+          <a href="contact.html">Contact</a>
+          <a href="join.html">Join the community</a>
+          <a href="policies.html">Policies &amp; privacy</a>
+        </div>
+        <div class="foot-col">
+          <h2>Connect</h2>
+          <a href="https://www.linkedin.com/company/punjabiforcenet">LinkedIn</a>
+          <a href="https://www.facebook.com/punjabiforcenet/">Facebook</a>
+          <a href="https://www.instagram.com/punjabiforcenet">Instagram</a>
+          <a href="https://x.com/punjabiforcenet">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span data-year>2026</span> Punjabiforce. One Punjab. One Force.
+        <span class="foot-credit">&middot; Designed by <a href="https://ksm1313live.netlify.app/" target="_blank" rel="noopener">Kam</a></span></span>
+      <span>@punjabiforcenet</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

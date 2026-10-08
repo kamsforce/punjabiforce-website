@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join &mdash; Punjabiforce</title>
+<meta name="description" content="Join Punjabiforce. Free to join, open to everyone, for mentees, mentors, volunteers and sponsors.">
+<link rel="icon" href="media/pf-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="index.html">
+      <img src="media/pf-icon.png" alt="" width="34" height="34">
+      <span>Punjabiforce</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="team.html">Team</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Community <span aria-hidden="true">&#9662;</span></button>
+        <div class="nav-drop-menu">
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </div>
+      <a href="volunteer.html">Volunteer</a>
+      <a href="contact.html">Contact</a>
+      <a href="dashboard.html" data-show="member" hidden>Dashboard</a>
+      <a href="admin.html" data-show="admin" hidden>Admin</a>
+      <a href="login.html" data-show="guest" hidden>Sign in</a>
+      <a href="#" data-signout data-show="member" hidden>Sign out</a>
+      <a href="join.html" class="nav-cta">Join us</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="page-hero">
+  <img class="watermark" src="media/pf-icon.png" alt="">
+  <div class="wrap">
+    <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Join the community</p>
+    <h1>Become part of Punjabiforce.</h1>
+    <p class="lede">Free to join, open to everyone. Tell us a little about yourself and how you'd like to take part.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" id="join-thanks" hidden>
+    <div class="thanks-panel" tabindex="-1">
+      <div class="thanks-tick" aria-hidden="true">&#10003;</div>
+      <h2 id="thanks-title">Thanks. Your application is in.</h2>
+      <p>Our admin team will review it and approve it as soon as possible.
+      We'll email you at <strong id="thanks-email"></strong>.</p>
+      <p class="junk-note"><strong>Check your junk folder.</strong> Our emails sometimes land in
+      junk or spam. Please look there and mark <strong>pfuknoreply@gmail.com</strong> as safe.</p>
+      <p>No reply within a week? Message us via our <a href="contact.html">contact page</a>.</p>
+      <a class="btn btn-primary" href="index.html">Back to home</a>
+    </div>
+  </div>
+
+  <div class="wrap contact-grid" id="join-area">
+    <form class="contact-form reveal" id="join-form" novalidate>
+      <div class="form-row">
+        <label><span class="lbl">First name</span>
+          <input type="text" name="first_name" autocomplete="given-name">
+        </label>
+        <label><span class="lbl">Last name <span class="req">*</span></span>
+          <input type="text" name="last_name" autocomplete="family-name" required>
+        </label>
+      </div>
+
+      <label><span class="lbl">Email <span class="req">*</span></span>
+        <input type="email" name="email" placeholder="you@email.com" autocomplete="email" required>
+      </label>
+
+      <label><span class="lbl">LinkedIn profile <span class="req">*</span></span>
+        <input type="url" name="linkedin_url" placeholder="https://www.linkedin.com/in/..." required>
+        <small>We use LinkedIn to verify members and to introduce mentors and mentees.</small>
+      </label>
+
+      <div class="form-row">
+        <label><span class="lbl">Company <span class="req">*</span></span>
+          <input type="text" name="company" autocomplete="organization" required>
+        </label>
+        <label><span class="lbl">Job title</span>
+          <input type="text" name="title" autocomplete="organization-title">
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label><span class="lbl">City</span>
+          <input type="text" name="city" autocomplete="address-level2">
+        </label>
+        <label><span class="lbl">Country</span>
+          <input type="text" name="country" autocomplete="country-name">
+        </label>
+      </div>
+
+      <fieldset class="check-group" data-render="type-options">
+        <legend>How would you like to take part? <span class="req">*</span></legend>
+        <!-- Fallback options; replaced from picklist_values on load -->
+        <label class="check"><input type="checkbox" name="types" value="mentee"> <span>Mentee &mdash; I'd like guidance</span></label>
+        <label class="check"><input type="checkbox" name="types" value="mentor"> <span>Mentor &mdash; I'd like to guide others</span></label>
+        <label class="check"><input type="checkbox" name="types" value="volunteer"> <span>Volunteer &mdash; I'd like to help run things</span></label>
+        <label class="check"><input type="checkbox" name="types" value="sponsor"> <span>Sponsor &mdash; I'd like to support the community</span></label>
+      </fieldset>
+
+      <label data-volunteer-only hidden><span class="lbl">Volunteer focus area</span>
+        <select name="volunteer_focus" data-render="volunteer-focus">
+          <option value="">Not sure yet &mdash; happy to help anywhere</option>
+        </select>
+      </label>
+
+      <label><span class="lbl">How did you hear about us?</span>
+        <select name="source" data-render="source-options">
+          <option value="">Select one</option>
+        </select>
+      </label>
+
+      <label><span class="lbl">Anything you'd like us to know</span>
+        <textarea name="description" rows="4" placeholder="A little about you and what you're hoping for"></textarea>
+      </label>
+
+      <fieldset class="check-group">
+        <legend>Consent <span class="req">*</span></legend>
+        <label class="check">
+          <input type="checkbox" name="consent" required>
+          <span>I've read the <a href="policies.html" target="_blank">privacy policy</a> and
+          agree to Punjabiforce storing these details to run community and mentoring
+          activities.</span>
+        </label>
+      </fieldset>
+
+      <button class="btn btn-primary" type="submit">Submit &rarr;</button>
+      <p class="form-status" role="status"></p>
+    </form>
+
+    <div class="contact-side reveal">
+      <div class="logo-panel">
+        <img src="media/pf-logo.png" alt="Punjabiforce" width="190" height="190">
+        <p>One Punjab. One Force.</p>
+        <span>Free to join</span>
+      </div>
+
+      <h2>What happens next</h2>
+      <p>One of the founders reads every submission. If you've asked for mentoring
+      we'll be in touch to talk through what you're working on and pair you with
+      someone who fits. There's no interview and no commitment to begin with.</p>
+
+      <p class="junk-note"><strong>Check your junk folder.</strong> Our emails sometimes land in
+      junk or spam. Please look there and mark <strong>pfuknoreply@gmail.com</strong> as safe.</p>
+
+      <h2 style="margin-top:28px">Your data</h2>
+      <p>We store what you enter here in a UK-hosted database and use it only to
+      run the community. We don't sell it or pass it to anyone else. You can ask
+      us to delete it at any time. The full detail is in our
+      <a href="policies.html">policies</a>.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-brand" href="index.html">
+        <img src="media/pf-icon.png" alt="" width="30" height="30">
+        <span>Punjabiforce</span>
+      </a>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h2>Community</h2>
+          <a href="team.html">Team</a>
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="volunteer.html">Volunteer with us</a>
+        </div>
+        <div class="foot-col">
+          <h2>Get in touch</h2>
+          <a href="contact.html">Contact</a>
+          <a href="join.html">Join the community</a>
+          <a href="policies.html">Policies &amp; privacy</a>
+        </div>
+        <div class="foot-col">
+          <h2>Connect</h2>
+          <a href="https://www.linkedin.com/company/punjabiforcenet">LinkedIn</a>
+          <a href="https://www.facebook.com/punjabiforcenet/">Facebook</a>
+          <a href="https://www.instagram.com/punjabiforcenet">Instagram</a>
+          <a href="https://x.com/punjabiforcenet">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span data-year>2026</span> Punjabiforce. One Punjab. One Force.
+        <span class="foot-credit">&middot; Designed by <a href="https://ksm1313live.netlify.app/" target="_blank" rel="noopener">Kam</a></span></span>
+      <span>@punjabiforcenet</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/join.js"></script>
+</body>
+</html>

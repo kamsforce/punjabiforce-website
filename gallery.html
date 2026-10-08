@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery &mdash; Punjabiforce</title>
+<meta name="description" content="Photos from Punjabiforce meetups, panels and events.">
+<link rel="icon" href="media/pf-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="index.html">
+      <img src="media/pf-icon.png" alt="" width="34" height="34">
+      <span>Punjabiforce</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html">Home</a>
+      <a href="team.html">Team</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button" aria-expanded="false" aria-haspopup="true">Community <span aria-hidden="true">&#9662;</span></button>
+        <div class="nav-drop-menu">
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </div>
+      <a href="volunteer.html">Volunteer</a>
+      <a href="contact.html">Contact</a>
+      <a href="dashboard.html" data-show="member" hidden>Dashboard</a>
+      <a href="admin.html" data-show="admin" hidden>Admin</a>
+      <a href="login.html" data-show="guest" hidden>Sign in</a>
+      <a href="#" data-signout data-show="member" hidden>Sign out</a>
+      <a href="join.html" class="nav-cta">Join us</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="page-hero">
+  <img class="watermark" src="media/pf-icon.png" alt="">
+  <div class="wrap">
+    <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Gallery</p>
+    <h1>Moments from the community.</h1>
+    <p class="lede">Photo stories from our meetups, panels and events.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap gal">
+    <div class="btn-row gal-actions">
+      <a class="btn btn-primary" href="https://www.facebook.com/punjabiforcenet/" target="_blank" rel="noopener">Follow us on Facebook &rarr;</a>
+      <a class="btn btn-quiet" href="https://www.facebook.com/punjabiforcenet/photos" target="_blank" rel="noopener">View all photos</a>
+    </div>
+    <div class="gal-grid" id="gal-grid"><p class="muted-note">Loading stories&hellip;</p></div>
+    <div class="btn-row gal-actions gal-more">
+      <a class="btn btn-quiet" href="https://medium.com/@punjabiforcenet" target="_blank" rel="noopener">Read more on Medium &rarr;</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="foot-brand" href="index.html">
+        <img src="media/pf-icon.png" alt="" width="30" height="30">
+        <span>Punjabiforce</span>
+      </a>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h2>Community</h2>
+          <a href="team.html">Team</a>
+          <a href="events.html">Events</a>
+          <a href="gallery.html">Gallery</a>
+          <a href="volunteer.html">Volunteer with us</a>
+        </div>
+        <div class="foot-col">
+          <h2>Get in touch</h2>
+          <a href="contact.html">Contact</a>
+          <a href="join.html">Join the community</a>
+          <a href="policies.html">Policies &amp; privacy</a>
+        </div>
+        <div class="foot-col">
+          <h2>Connect</h2>
+          <a href="https://www.linkedin.com/company/punjabiforcenet">LinkedIn</a>
+          <a href="https://www.facebook.com/punjabiforcenet/">Facebook</a>
+          <a href="https://www.instagram.com/punjabiforcenet">Instagram</a>
+          <a href="https://x.com/punjabiforcenet">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; <span data-year>2026</span> Punjabiforce. One Punjab. One Force.
+        <span class="foot-credit">&middot; Designed by <a href="https://ksm1313live.netlify.app/" target="_blank" rel="noopener">Kam</a></span></span>
+      <span>@punjabiforcenet</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/gallery.js"></script>
+
+</body>
+</html>
