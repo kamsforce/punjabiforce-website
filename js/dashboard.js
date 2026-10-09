@@ -1,7 +1,8 @@
 /* ==========================================================================
    Punjabiforce - member dashboard
-   Shows the signed-in member their own pairings only. RLS enforces this;
-   the queries below simply ask for what the member is allowed to see.
+   Everyone signed in sees their own details, bookings and past events.
+   Mentors and mentees also see their pairings. RLS enforces all of this;
+   the queries below only ask for what the person is allowed to see.
    ========================================================================== */
 
 (function () {
@@ -14,9 +15,25 @@
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   let me = null;
+  let bookings = [];
 
   const PERSON_FIELDS =
     'id, first_name, last_name, title, company, city, country, bio, linkedin_url, avatar_url';
+
+  const ROLE_LABEL = {
+    event_attendee: 'Event Attendee', volunteer: 'Volunteer', mentee: 'Mentee', mentor: 'Mentor',
+    sponsor: 'Sponsor', speaker: 'Speaker', advisory: 'Advisory'
+  };
+  const JOIN_LABEL = { attendee: '', volunteer: 'Volunteering', speaker: 'Speaking' };
+
+  const ukWhen = (startIso, endIso) => {
+    const opt = { timeZone: 'Europe/London', weekday: 'short', day: 'numeric', month: 'short',
+                  year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    let s = new Date(startIso).toLocaleString('en-GB', opt);
+    if (endIso) s += ' to ' + new Date(endIso).toLocaleTimeString('en-GB',
+      { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' });
+    return s;
+  };
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -24,20 +41,177 @@
     me = await PF_AUTH.requireAuth();
     if (!me) return;
 
-    document.getElementById('greeting').textContent =
-      'Welcome back, ' + me.first_name + '.';
+    renderHeader();
+    renderDetails();
+    wireDetailsModal();
+    document.getElementById('dash-top').hidden = false;
 
-    const roles = [];
-    if (me.is_mentee) roles.push('mentee');
-    if (me.is_mentor) roles.push('mentor');
-    document.getElementById('role-line').textContent = roles.length
-      ? 'You are registered as a ' + roles.join(' and ') + '.'
-      : 'Your membership is being set up.';
-
-    await Promise.all([loadAsMentee(), loadAsMentor(), loadHistory()]);
+    await Promise.all([loadBookings(), loadAsMentee(), loadAsMentor(), loadHistory()]);
 
     document.getElementById('dash-loading').hidden = true;
     wireFeedbackModal();
+  }
+
+  /* ---------------- header and details ---------------- */
+
+  function renderHeader() {
+    document.getElementById('greeting').textContent = 'Welcome back, ' + me.first_name + '.';
+    const roles = (me.roles || []).map(r => ROLE_LABEL[r] || r);
+    document.getElementById('role-line').innerHTML = roles.length
+      ? roles.map(r => '<span class="role-tag">' + esc(r) + '</span>').join(' ')
+      : 'Your Punjabiforce account.';
+  }
+
+  function renderDetails() {
+    const row = (k, v) => '<dt>' + k + '</dt><dd>' + (v || '<span class="muted">Not added</span>') + '</dd>';
+    document.getElementById('details-list').innerHTML =
+      row('Name', esc(me.first_name + ' ' + me.last_name)) +
+      row('Email', esc(me.email)) +
+      row('LinkedIn', me.linkedin_url
+        ? '<a href="' + esc(me.linkedin_url) + '" target="_blank" rel="noopener">' +
+          esc(me.linkedin_url.replace(/^https?:\/\/(www\.)?/, '')) + '</a>' : '') +
+      row('Job title', esc(me.title || '')) +
+      row('Company', esc(me.company || ''));
+  }
+
+  function wireDetailsModal() {
+    const modal = document.getElementById('details-modal');
+    const form = document.getElementById('details-form');
+    const status = form.querySelector('.form-status');
+
+    document.getElementById('edit-details').addEventListener('click', () => {
+      ['first_name', 'last_name', 'linkedin_url', 'title', 'company']
+        .forEach(k => { form[k].value = me[k] || ''; });
+      status.className = 'form-status';
+      modal.hidden = false;
+    });
+    modal.addEventListener('click', e => {
+      if (e.target === modal || e.target.closest('[data-close-modal]')) modal.hidden = true;
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const v = k => (fd.get(k) || '').toString().trim();
+      const say = (m, ok) => { status.textContent = m; status.className = 'form-status show ' + (ok ? 'ok' : 'error'); };
+
+      if (!v('first_name') || !v('last_name')) return say('Please add your first and last name.');
+      if (!/^https?:\/\/([a-z]{2,3}\.)?linkedin\.com\//i.test(v('linkedin_url')))
+        return say('Please add a full LinkedIn profile URL, starting with https://');
+
+      const patch = {
+        first_name: v('first_name'), last_name: v('last_name'),
+        linkedin_url: v('linkedin_url'), title: v('title') || null, company: v('company') || null
+      };
+      const { error } = await sb.from('profiles').update(patch).eq('id', me.id);
+      if (error) return say('Could not save: ' + error.message);
+
+      Object.assign(me, patch);
+      renderHeader();
+      renderDetails();
+      say('Saved.', true);
+      setTimeout(() => { modal.hidden = true; }, 700);
+    });
+  }
+
+  /* ---------------- bookings ---------------- */
+
+  async function loadBookings() {
+    const { data, error } = await sb.from('event_bookings')
+      .select('id,status,joining_as,eventspf(id,slug,title,event_datetime,event_end,where_type,location,summary)')
+      .eq('profile_id', me.id);
+    // event_end arrives with task 3; fall back gracefully if the column is not there yet
+    if (error && /event_end/.test(error.message || '')) {
+      const retry = await sb.from('event_bookings')
+        .select('id,status,joining_as,eventspf(id,slug,title,event_datetime,where_type,location,summary)')
+        .eq('profile_id', me.id);
+      bookings = retry.data || [];
+    } else {
+      bookings = data || [];
+    }
+    bookings = bookings.filter(b => b.eventspf);
+    renderUpcoming();
+    renderPast();
+  }
+
+  function renderUpcoming() {
+    const now = Date.now();
+    const list = bookings
+      .filter(b => b.status === 'booked' && new Date(b.eventspf.event_datetime).getTime() >= now - 3 * 3600e3)
+      .sort((a, b) => new Date(a.eventspf.event_datetime) - new Date(b.eventspf.event_datetime));
+
+    const el = document.getElementById('upcoming-list');
+    if (!list.length) {
+      el.innerHTML = '<p class="muted-note dash-empty">Nothing booked yet. ' +
+        '<a href="events.html">See what’s coming up</a>.</p>';
+      return;
+    }
+    el.innerHTML = list.map(b => {
+      const e = b.eventspf;
+      const where = e.where_type === 'virtual' ? 'Online' : (e.location || 'In person');
+      return '<div class="dash-event">' +
+        '<div class="dash-event-when">' + esc(ukWhen(e.event_datetime, e.event_end)) + '</div>' +
+        '<h3>' + esc(e.title) + '</h3>' +
+        '<p class="muted">' + esc(where) + (JOIN_LABEL[b.joining_as] ? ' · ' + esc(JOIN_LABEL[b.joining_as]) : '') + '</p>' +
+        '<div class="btn-row dash-event-actions">' +
+          '<button class="btn-mini" type="button" data-ics="' + esc(b.id) + '">Add to calendar</button>' +
+          '<button class="btn-mini btn-mini-quiet" type="button" data-cancel="' + esc(b.id) + '">Cancel</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderPast() {
+    const list = bookings
+      .filter(b => b.status === 'attended')
+      .sort((a, b) => new Date(b.eventspf.event_datetime) - new Date(a.eventspf.event_datetime));
+    if (!list.length) return;
+
+    document.getElementById('past-block').hidden = false;
+    document.getElementById('past-title').textContent =
+      list.length === 1 ? '1 event attended.' : list.length + ' events attended.';
+    document.getElementById('past-list').innerHTML = list.map(b =>
+      '<div class="dash-past-item">' +
+        '<span class="dash-event-when">' + esc(new Date(b.eventspf.event_datetime).toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'short', year: 'numeric' })) + '</span>' +
+        '<strong>' + esc(b.eventspf.title) + '</strong>' +
+        (JOIN_LABEL[b.joining_as] ? '<span class="chip">' + esc(JOIN_LABEL[b.joining_as]) + '</span>' : '') +
+      '</div>').join('');
+  }
+
+  document.addEventListener('click', async e => {
+    const c = e.target.closest('[data-cancel]');
+    if (c) {
+      const b = bookings.find(x => x.id === c.dataset.cancel);
+      if (!b || !confirm('Cancel your place at ' + b.eventspf.title + '?')) return;
+      c.disabled = true;
+      const { error } = await sb.from('event_bookings').update({ status: 'cancelled' }).eq('id', b.id);
+      if (error) { c.disabled = false; alert(error.message || 'Sorry, that did not work.'); return; }
+      b.status = 'cancelled';
+      renderUpcoming();
+      return;
+    }
+    const i = e.target.closest('[data-ics]');
+    if (i) {
+      const b = bookings.find(x => x.id === i.dataset.ics);
+      if (b) downloadIcs(b.eventspf);
+    }
+  });
+
+  function downloadIcs(ev) {
+    const start = new Date(ev.event_datetime);
+    const end = ev.event_end ? new Date(ev.event_end) : new Date(start.getTime() + 2 * 3600e3);
+    const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const clean = s => String(s || '').replace(/[\;,]/g, m => '\\' + m).replace(/\r?\n/g, '\\n');
+    const where = ev.where_type === 'virtual' ? 'Online' : (ev.location || 'In person');
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Punjabiforce//Events//EN', 'BEGIN:VEVENT',
+      'UID:' + ev.id + '@punjabiforce', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(start), 'DTEND:' + f(end),
+      'SUMMARY:' + clean(ev.title), 'LOCATION:' + clean(where), 'DESCRIPTION:' + clean(ev.summary),
+      'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = (ev.slug || 'punjabiforce-event') + '.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   /* ---------------- mentee view ---------------- */
@@ -122,6 +296,7 @@
   /* ---------------- completed history ---------------- */
 
   async function loadHistory() {
+    if (!me.is_mentee && !me.is_mentor) return;
     const { data } = await sb
       .from('mentorships')
       .select('id, status, started_at, ended_at, sequence_number, focus_area, ' +

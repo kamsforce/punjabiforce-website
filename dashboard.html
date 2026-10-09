@@ -55,7 +55,33 @@
   <div class="wrap">
     <div id="dash-loading" class="muted-note">Loading your details&hellip;</div>
 
-    <div id="mentee-block" hidden>
+    <div class="dash-grid" id="dash-top" hidden>
+      <article class="dash-card" id="my-details">
+        <div class="dash-card-head">
+          <h2>My details</h2>
+          <button class="btn-mini" type="button" id="edit-details">Edit</button>
+        </div>
+        <dl class="dash-dl" id="details-list"></dl>
+      </article>
+
+      <article class="dash-card">
+        <div class="dash-card-head">
+          <h2>My upcoming events</h2>
+          <a class="btn-mini btn-mini-quiet" href="events.html">See events</a>
+        </div>
+        <div id="upcoming-list"></div>
+      </article>
+    </div>
+
+    <div id="past-block" class="dash-section" hidden>
+      <div class="sec-head">
+        <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your history</p>
+        <h2 id="past-title">Events you've attended.</h2>
+      </div>
+      <div class="dash-past" id="past-list"></div>
+    </div>
+
+    <div id="mentee-block" class="dash-section" hidden>
       <div class="sec-head">
         <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your mentor</p>
         <h2>Who you're paired with.</h2>
@@ -63,7 +89,7 @@
       <div id="mentee-pairing"></div>
     </div>
 
-    <div id="mentor-block" hidden style="margin-top:56px">
+    <div id="mentor-block" class="dash-section" hidden>
       <div class="sec-head">
         <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Your mentees</p>
         <h2>People you're supporting.</h2>
@@ -71,7 +97,7 @@
       <div id="mentor-pairings" class="team-grid"></div>
     </div>
 
-    <div id="history-block" hidden style="margin-top:56px">
+    <div id="history-block" class="dash-section" hidden>
       <div class="sec-head">
         <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Previously</p>
         <h2>Past mentorships.</h2>
@@ -80,6 +106,31 @@
     </div>
   </div>
 </section>
+
+<!-- Edit my details -->
+<div class="modal" id="details-modal" hidden>
+  <div class="modal-card">
+    <h2>Edit my details</h2>
+    <p class="muted-note">Your email is how you sign in. To change it, please contact us.</p>
+    <form class="contact-form" id="details-form" novalidate>
+      <div class="form-row">
+        <label><span class="lbl">First name <span class="req">*</span></span><input name="first_name" autocomplete="given-name" required></label>
+        <label><span class="lbl">Last name <span class="req">*</span></span><input name="last_name" autocomplete="family-name" required></label>
+      </div>
+      <label><span class="lbl">LinkedIn URL <span class="req">*</span></span>
+        <input name="linkedin_url" type="url" placeholder="https://www.linkedin.com/in/your-name" required></label>
+      <div class="form-row">
+        <label><span class="lbl">Job title</span><input name="title" autocomplete="organization-title"></label>
+        <label><span class="lbl">Company</span><input name="company" autocomplete="organization"></label>
+      </div>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Feedback dialog -->
 <div class="modal" id="feedback-modal" hidden>
