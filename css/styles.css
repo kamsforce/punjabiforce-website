@@ -1143,3 +1143,10 @@ select:focus-visible {
 @media (max-width: 560px) {
   .event-actions .btn, .booked-badge { width: 100%; justify-content: center; }
 }
+
+/* Sign-in: which code to use */
+.code-tip {
+  font-size: 13.5px; line-height: 1.6; color: var(--navy);
+  background: rgba(254, 156, 8, 0.12); border-left: 3px solid var(--orange);
+  border-radius: 8px; padding: 10px 14px; margin: 4px 0 0;
+}
