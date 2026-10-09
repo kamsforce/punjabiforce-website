@@ -22,13 +22,19 @@
     status.className = 'form-status show ' + (ok ? 'ok' : 'error');
   }
 
+  /* Only ever send people back to a page on this site, e.g. "events.html?book=..." */
+  function safeNext() {
+    const n = new URLSearchParams(window.location.search).get('next') || '';
+    return /^[a-z-]+\.html(\?[A-Za-z0-9=&%_.-]*)?$/.test(n) ? n : '';
+  }
+
   /* Already signed in? Go straight through. */
   (async function () {
     const session = await PF_AUTH.getSession();
     if (session) {
       const profile = await PF_AUTH.getProfile();
-      window.location.href = (profile && profile.is_admin)
-        ? 'admin.html' : 'dashboard.html';
+      window.location.href = safeNext() || ((profile && profile.is_admin)
+        ? 'admin.html' : 'dashboard.html');
     }
   })();
 
@@ -43,8 +49,7 @@
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
 
-    const params = new URLSearchParams(window.location.search);
-    const next = params.get('next') || 'dashboard.html';
+    const next = safeNext() || 'dashboard.html';
 
     /* Resolve against the folder this page sits in, so the site works whether
        it is served from the domain root or a subfolder such as
@@ -143,7 +148,7 @@
                        'Use a different email to request a new one.', false);
       }
 
-      const next = new URLSearchParams(window.location.search).get('next');
+      const next = safeNext();
       // Fresh lookup: the auth helper cached "signed out" when this page loaded.
       const { data: sess } = await sb.auth.getSession();
       const { data: profile } = await sb.from('profiles')

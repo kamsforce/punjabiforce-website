@@ -1124,3 +1124,22 @@ select:focus-visible {
   .gal-card { width: 100%; }
   .gal-actions .btn { width: 100%; justify-content: center; }
 }
+
+/* ---------- Events: booking ---------- */
+.event-item .tag-ok   { color: #04618a; border-color: rgba(0, 161, 224, 0.45); }
+.event-item .tag-few  { color: var(--navy); background: rgba(254, 156, 8, 0.18); border-color: transparent; }
+.event-item .tag-full { color: var(--white); background: var(--navy); border-color: var(--navy); }
+.booked-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 600; font-size: 14.5px; color: #04618a;
+  background: rgba(0, 161, 224, 0.1); border-radius: 100px; padding: 9px 16px;
+}
+.booking-note { font-size: 14px; color: var(--muted); font-style: italic; }
+.event-actions .btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.booking-email { font-size: 13.5px; color: var(--muted); margin: -6px 0 2px; }
+.booking-done { text-align: center; }
+.booking-done .btn-row { justify-content: center; }
+.booking-done .thanks-tick { margin: 0 auto 14px; }
+@media (max-width: 560px) {
+  .event-actions .btn, .booked-badge { width: 100%; justify-content: center; }
+}
