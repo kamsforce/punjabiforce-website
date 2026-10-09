@@ -58,8 +58,10 @@ const PF_AUTH = (function () {
     document.querySelectorAll('[data-show="member"]').forEach(el => {
       el.hidden = !profile;
     });
+    // Admin page link: Admins and Helpdesk Admins
     document.querySelectorAll('[data-show="admin"]').forEach(el => {
-      el.hidden = !(profile && profile.is_admin);
+      el.hidden = !(profile && (profile.is_admin ||
+        profile.access_level === 'admin' || profile.access_level === 'helpdesk'));
     });
     document.querySelectorAll('[data-show="guest"]').forEach(el => {
       el.hidden = !!session;
@@ -69,6 +71,7 @@ const PF_AUTH = (function () {
   /** Redirect away if not signed in. Optionally require admin. */
   async function requireAuth(opts) {
     const needAdmin = opts && opts.admin;
+    const needStaff = opts && opts.staff;   // Admin or Helpdesk Admin
 
     if (!sb) {
       offlineMessage();
@@ -99,6 +102,10 @@ const PF_AUTH = (function () {
     }
 
     if (needAdmin && !profile.is_admin) {
+      window.location.href = 'dashboard.html';
+      return null;
+    }
+    if (needStaff && !(profile.is_admin || profile.access_level === 'helpdesk')) {
       window.location.href = 'dashboard.html';
       return null;
     }

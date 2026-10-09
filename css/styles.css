@@ -1150,3 +1150,97 @@ select:focus-visible {
   background: rgba(254, 156, 8, 0.12); border-left: 3px solid var(--orange);
   border-radius: 8px; padding: 10px 14px; margin: 4px 0 0;
 }
+
+/* ---------- Admin: step 3 (members, attendees, activity, mobile) ---------- */
+.admin-who { margin-top: 14px; font-size: 14px; color: var(--blue-light); }
+.admin-bar-note { margin: 0; }
+.admin-search, #attendee-event {
+  font-family: var(--font-body); font-size: 14.5px; padding: 10px 14px;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--mist);
+  min-width: 260px; max-width: 100%; color: var(--ink);
+}
+.muted { color: var(--muted); font-size: 13px; }
+.li-link { word-break: break-all; }
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.data-table td .chip { margin: 2px 3px 2px 0; }
+
+.pill-level-admin    { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.pill-level-helpdesk { background: rgba(254,156,8,0.18); color: #8a5a00; border-color: transparent; }
+.pill-bk-attended    { background: rgba(0,161,224,0.14); color: #04618a; border-color: transparent; }
+.pill-bk-no_show     { background: rgba(6,15,41,0.08); color: var(--navy); border-color: transparent; }
+.pill-bk-cancelled   { background: transparent; color: var(--muted); }
+
+/* Attendees: built for the reception desk, big tap targets */
+.att-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+.att-stat {
+  background: var(--mist); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;
+}
+.att-stat span { font-size: 12px; color: var(--muted); }
+.att-stat strong { font-size: 22px; color: var(--navy); font-weight: 700; }
+.att-tools { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.att-tools .admin-search { flex: 1 1 240px; }
+.att-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.att-filter {
+  font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer;
+  padding: 8px 14px; border-radius: 100px; border: 1px solid var(--line);
+  background: var(--white); color: var(--navy);
+}
+.att-filter.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.att-list { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.att-list > .muted-note { margin: 0; padding: 28px; text-align: center; }
+.att-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--white);
+}
+.att-row:last-child { border-bottom: none; }
+.att-row.is-here { background: rgba(0,161,224,0.06); }
+.att-row.is-cancelled { opacity: 0.6; }
+.att-check { display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+.att-check input { width: 26px; height: 26px; accent-color: var(--blue); cursor: pointer; }
+.att-who { display: flex; flex-direction: column; min-width: 0; }
+.att-who strong { font-size: 16px; color: var(--navy); }
+.att-who span { font-size: 13px; color: var(--muted); }
+.att-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.att-meta .pill { margin-left: 0; }
+.att-li {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px;
+  background: #0a66c2; color: #fff !important; font-weight: 700; font-size: 13px; text-decoration: none;
+}
+.att-actions { margin-top: 16px; }
+
+/* Phones: tables become cards, attendee rows stack */
+@media (max-width: 760px) {
+  .admin-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-tab { padding: 10px 12px; white-space: nowrap; }
+  .admin-search, #attendee-event { min-width: 0; width: 100%; }
+  .admin-bar > * { width: 100%; }
+  .admin-bar h2 { width: auto; }
+
+  .table-scroll { border: none; overflow: visible; }
+  .data-table.cards { min-width: 0; }
+  .data-table.cards thead { display: none; }
+  .data-table.cards tr {
+    display: block; border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px 14px; margin-bottom: 12px; background: var(--white);
+  }
+  .data-table.cards td {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 7px 0; border-bottom: 1px solid var(--line); text-align: right;
+  }
+  .data-table.cards td:last-child { border-bottom: none; }
+  .data-table.cards td[data-label]::before {
+    content: attr(data-label); font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+    text-align: left; flex-shrink: 0;
+  }
+  .data-table.cards td.row-actions { justify-content: flex-end; flex-wrap: wrap; }
+  .data-table.cards .empty-row { display: block; text-align: center; }
+
+  .att-stats { grid-template-columns: repeat(3, 1fr); }
+  .att-stat strong { font-size: 18px; }
+  .att-row { grid-template-columns: auto 1fr; }
+  .att-meta { grid-column: 1 / -1; justify-content: flex-start; padding-left: 58px; }
+  .role-grid { grid-template-columns: 1fr; }
+  .att-actions .btn { width: 100%; justify-content: center; }
+}

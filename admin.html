@@ -47,7 +47,8 @@
   <div class="wrap">
     <p class="eyebrow"><img class="mark" src="media/pf-icon.png" alt="">Admin</p>
     <h1>Community management.</h1>
-    <p class="lede">Applications, members, mentoring pairings and events.</p>
+    <p class="lede">Applications, members, event attendees, mentoring and events.</p>
+    <p class="admin-who" id="admin-who" hidden></p>
   </div>
 </section>
 
@@ -56,24 +57,52 @@
     <div class="admin-tabs" role="tablist">
       <button class="admin-tab active" data-panel="applications">Applications</button>
       <button class="admin-tab" data-panel="members">Members</button>
-      <button class="admin-tab" data-panel="pairings">Pairings</button>
-      <button class="admin-tab" data-panel="feedback">Feedback</button>
-      <button class="admin-tab" data-panel="events">Events</button>
+      <button class="admin-tab" data-panel="attendees">Attendees</button>
+      <button class="admin-tab" data-panel="pairings" data-admin-only>Pairings</button>
+      <button class="admin-tab" data-panel="feedback" data-admin-only>Feedback</button>
+      <button class="admin-tab" data-panel="events" data-admin-only>Events</button>
+      <button class="admin-tab" data-panel="activity" data-admin-only>Activity</button>
     </div>
 
     <div class="admin-panel active" id="panel-applications">
       <div class="admin-bar">
         <h2>Join requests</h2>
-        <select id="application-filter">
+        <select id="application-filter" aria-label="Filter by status">
           <option value="">All statuses</option>
         </select>
       </div>
-      <div class="table-scroll"><table class="data-table" id="applications-table"></table></div>
+      <div class="table-scroll"><table class="data-table cards" id="applications-table"></table></div>
     </div>
 
     <div class="admin-panel" id="panel-members">
-      <div class="admin-bar"><h2>Members</h2></div>
-      <div class="table-scroll"><table class="data-table" id="members-table"></table></div>
+      <div class="admin-bar">
+        <h2>Members</h2>
+        <input type="search" class="admin-search" id="member-search" placeholder="Search name, email or company" aria-label="Search members">
+      </div>
+      <div class="table-scroll"><table class="data-table cards" id="members-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-attendees">
+      <div class="admin-bar">
+        <h2>Attendees</h2>
+        <select id="attendee-event" aria-label="Choose event"></select>
+      </div>
+      <div class="att-stats" id="att-stats"></div>
+      <div class="att-tools">
+        <input type="search" class="admin-search" id="att-search" placeholder="Find a name" aria-label="Find attendee">
+        <div class="att-filters" role="group" aria-label="Show">
+          <button class="att-filter active" data-att-filter="registered">Registered</button>
+          <button class="att-filter" data-att-filter="attended">Attended</button>
+          <button class="att-filter" data-att-filter="no_show">No-show</button>
+          <button class="att-filter" data-att-filter="cancelled">Cancelled</button>
+        </div>
+      </div>
+      <div class="att-list" id="att-list"></div>
+      <div class="btn-row att-actions">
+        <button class="btn btn-quiet" id="att-add">Add a member</button>
+        <button class="btn btn-quiet" id="att-noshow">Mark the rest as no-show</button>
+        <button class="btn btn-quiet" id="att-export" data-admin-only>Export CSV</button>
+      </div>
     </div>
 
     <div class="admin-panel" id="panel-pairings">
@@ -81,12 +110,12 @@
         <h2>Mentorships</h2>
         <button class="btn btn-primary" id="new-pairing-btn">New pairing</button>
       </div>
-      <div class="table-scroll"><table class="data-table" id="pairings-table"></table></div>
+      <div class="table-scroll"><table class="data-table cards" id="pairings-table"></table></div>
     </div>
 
     <div class="admin-panel" id="panel-feedback">
       <div class="admin-bar"><h2>Feedback</h2></div>
-      <div class="table-scroll"><table class="data-table" id="feedback-table"></table></div>
+      <div class="table-scroll"><table class="data-table cards" id="feedback-table"></table></div>
     </div>
 
     <div class="admin-panel" id="panel-events">
@@ -94,10 +123,101 @@
         <h2>Events</h2>
         <button class="btn btn-primary" id="new-event-btn">Add event</button>
       </div>
-      <div class="table-scroll"><table class="data-table" id="events-table"></table></div>
+      <div class="table-scroll"><table class="data-table cards" id="events-table"></table></div>
+    </div>
+
+    <div class="admin-panel" id="panel-activity">
+      <div class="admin-bar"><h2>Activity</h2><span class="muted-note admin-bar-note">Changes made by Admins and Helpdesk Admins, newest first</span></div>
+      <div class="table-scroll"><table class="data-table cards" id="activity-table"></table></div>
     </div>
   </div>
 </section>
+
+<!-- Edit member -->
+<div class="modal" id="member-modal" hidden>
+  <div class="modal-card">
+    <h2>Edit member</h2>
+    <p class="muted-note" id="member-email"></p>
+    <form class="contact-form" id="member-form" novalidate>
+      <input type="hidden" name="id">
+      <div class="form-row">
+        <label><span class="lbl">First name <span class="req">*</span></span><input name="first_name" required></label>
+        <label><span class="lbl">Last name <span class="req">*</span></span><input name="last_name" required></label>
+      </div>
+      <label><span class="lbl">LinkedIn URL <span class="req">*</span></span>
+        <input name="linkedin_url" type="url" placeholder="https://www.linkedin.com/in/..." required></label>
+      <div class="form-row">
+        <label><span class="lbl">Job title</span><input name="title"></label>
+        <label><span class="lbl">Company</span><input name="company"></label>
+      </div>
+      <fieldset class="check-group" data-admin-only>
+        <legend>Roles</legend>
+        <div class="role-grid" id="member-roles"></div>
+      </fieldset>
+      <label data-admin-only><span class="lbl">Permission</span>
+        <select name="access_level">
+          <option value="individual">Individual</option>
+          <option value="helpdesk">Helpdesk Admin</option>
+          <option value="admin">Admin</option>
+        </select></label>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit application -->
+<div class="modal" id="application-modal" hidden>
+  <div class="modal-card">
+    <h2>Edit application</h2>
+    <form class="contact-form" id="application-form" novalidate>
+      <input type="hidden" name="id">
+      <div class="form-row">
+        <label><span class="lbl">First name</span><input name="first_name"></label>
+        <label><span class="lbl">Last name <span class="req">*</span></span><input name="last_name" required></label>
+      </div>
+      <label><span class="lbl">Email <span class="req">*</span></span><input name="email" type="email" required></label>
+      <label><span class="lbl">LinkedIn URL <span class="req">*</span></span>
+        <input name="linkedin_url" type="url" required></label>
+      <div class="form-row">
+        <label><span class="lbl">Job title</span><input name="title"></label>
+        <label><span class="lbl">Company <span class="req">*</span></span><input name="company" required></label>
+      </div>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add a member to an event -->
+<div class="modal" id="att-modal" hidden>
+  <div class="modal-card">
+    <h2>Add a member to this event</h2>
+    <p class="muted-note">For people who already have a Punjabiforce profile. New walk-ins can book on the Events page with their phone.</p>
+    <form class="contact-form" id="att-form" novalidate>
+      <label><span class="lbl">Member</span>
+        <select name="profile_id" required><option value="">Choose a member</option></select></label>
+      <label><span class="lbl">Joining as</span>
+        <select name="joining_as">
+          <option value="attendee">Attendee</option>
+          <option value="volunteer">Volunteer</option>
+          <option value="speaker" data-admin-only>Speaker</option>
+        </select></label>
+      <label class="check"><input type="checkbox" name="checked_in" checked> <span>Mark as attended now</span></label>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit">Add</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Add / edit event dialog -->
 <div class="modal" id="event-modal" hidden>
@@ -128,11 +248,13 @@
         <label><span class="lbl">Location</span>
           <input type="text" name="location" placeholder="e.g. London, or Zoom"></label>
       </div>
+      <label><span class="lbl">Capacity <small>(places for attendees; leave empty for unlimited)</small></span>
+        <input type="number" name="capacity" min="0" step="1" inputmode="numeric" placeholder="e.g. 80"></label>
       <label><span class="lbl">Summary</span>
         <textarea name="summary" rows="3"></textarea></label>
       <label><span class="lbl">Image URL</span>
         <input type="text" name="image_url" placeholder="https://... or media/file.jpg"></label>
-      <label><span class="lbl">Registration URL</span>
+      <label><span class="lbl">Registration URL <small>(only for events booked on another site; leave empty to book here)</small></span>
         <input type="url" name="registration_url" placeholder="https://..."></label>
       <label><span class="lbl">Recording URL</span>
         <input type="url" name="recording_url" placeholder="https://..."></label>
@@ -144,7 +266,6 @@
     </form>
   </div>
 </div>
-
 <!-- New pairing dialog -->
 <div class="modal" id="pairing-modal" hidden>
   <div class="modal-card">
