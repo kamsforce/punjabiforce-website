@@ -106,6 +106,36 @@
     </div>
   </div>
 </section>
+<section class="dash-account-sec">
+  <div class="wrap">
+    <div class="dash-account">
+      <div>
+        <h2>Your account</h2>
+        <p class="muted-note">You can delete your account at any time. This removes your details and bookings from Punjabiforce.</p>
+      </div>
+      <button class="btn btn-quiet btn-danger" type="button" id="delete-account-btn">Delete my account</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- Delete account -->
+<div class="modal" id="delete-modal" hidden>
+  <div class="modal-card">
+    <h2>Delete your account?</h2>
+    <p class="muted-note">This permanently removes your profile, your event bookings and your
+      application. Mentoring feedback you gave is kept without your name. You cannot undo this.</p>
+    <form class="contact-form" id="delete-form" novalidate>
+      <label><span class="lbl">Type DELETE to confirm</span>
+        <input name="confirm" autocomplete="off" autocapitalize="characters"></label>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-danger-solid" type="submit">Delete my account</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Keep my account</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- Edit my details -->
 <div class="modal" id="details-modal" hidden>

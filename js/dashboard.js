@@ -50,6 +50,7 @@
 
     document.getElementById('dash-loading').hidden = true;
     wireFeedbackModal();
+    wireDeleteAccount();
   }
 
   /* ---------------- header and details ---------------- */
@@ -212,6 +213,54 @@
     a.href = url; a.download = (ev.slug || 'punjabiforce-event') + '.ics';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  /* ---------------- delete account ---------------- */
+
+  function wireDeleteAccount() {
+    const modal = document.getElementById('delete-modal');
+    const form = document.getElementById('delete-form');
+    const status = form.querySelector('.form-status');
+    const say = m => { status.textContent = m; status.className = 'form-status show error'; };
+
+    document.getElementById('delete-account-btn').addEventListener('click', () => {
+      if (me.is_admin) {
+        alert('Admins cannot delete their own account. Ask the other Admin to remove your Admin permission first.');
+        return;
+      }
+      form.reset();
+      status.className = 'form-status';
+      modal.hidden = false;
+      form.confirm.focus();
+    });
+    modal.addEventListener('click', e => {
+      if (e.target === modal || e.target.closest('[data-close-modal]')) modal.hidden = true;
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if ((form.confirm.value || '').trim().toUpperCase() !== 'DELETE') return say('Please type DELETE to confirm.');
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Deleting\u2026';
+
+      const { data, error } = await sb.functions.invoke('delete-account', { body: { confirm: 'DELETE' } });
+      if (error || !data || !data.ok) {
+        let msg = 'Sorry, that did not work. Please contact us.';
+        try { const j = error && error.context ? await error.context.json() : null; if (j && j.error) msg = j.error; } catch (x) {}
+        btn.disabled = false;
+        btn.textContent = 'Delete my account';
+        return say(msg);
+      }
+      try { await sb.auth.signOut(); } catch (x) {}
+      document.querySelector('main').innerHTML =
+        '<section><div class="wrap"><div class="thanks-panel">' +
+        '<div class="thanks-tick" aria-hidden="true">&#10003;</div>' +
+        '<h2>Your account has been deleted.</h2>' +
+        '<p>Your details and bookings have been removed. We have emailed you a confirmation.</p>' +
+        '<a class="btn btn-primary" href="index.html">Back to the site</a></div></div></section>';
+      window.scrollTo(0, 0);
+    });
   }
 
   /* ---------------- mentee view ---------------- */

@@ -1286,3 +1286,20 @@ select:focus-visible {
   .dash-dl { grid-template-columns: 84px 1fr; }
   .dash-event-actions .btn-mini { flex: 1; text-align: center; }
 }
+
+/* ---------- Delete account ---------- */
+.dash-account-sec { padding-top: 0; }
+.dash-account {
+  display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;
+  border-top: 1px solid var(--line); padding-top: 32px;
+}
+.dash-account h2 { font-size: 18px; font-weight: 600; color: var(--navy); }
+.dash-account .muted-note { margin-top: 6px; }
+.btn-danger { color: #b42318; border-color: rgba(180, 35, 24, 0.35); }
+.btn-danger:hover { color: #fff; background: #b42318; border-color: #b42318; }
+.btn-danger-solid { background: #b42318; color: #fff; }
+.btn-danger-solid:hover { background: #912018; }
+.member-delete { margin-left: auto; }
+@media (max-width: 560px) {
+  .dash-account .btn, .member-delete { width: 100%; justify-content: center; margin-left: 0; }
+}

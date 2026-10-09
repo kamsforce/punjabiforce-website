@@ -296,6 +296,28 @@
   function wireMemberModal() {
     document.getElementById('member-search').addEventListener('input', renderMembers);
     const form = document.getElementById('member-form');
+
+    const delBtn = document.getElementById('member-delete');
+    if (delBtn) delBtn.addEventListener('click', async () => {
+      const id = form.id.value;
+      const p = people.find(x => x.id === id);
+      if (!p) return;
+      if (p.id === me.id) return formSay(form, 'You cannot delete your own account here.');
+      if (p.access_level === 'admin') return formSay(form, 'Change their permission from Admin first.');
+      const typed = prompt('This permanently deletes ' + p.first_name + ' ' + p.last_name +
+        ', their bookings and application. Type DELETE to confirm.');
+      if ((typed || '').trim().toUpperCase() !== 'DELETE') return;
+      delBtn.disabled = true;
+      const { data, error } = await sb.functions.invoke('delete-account', { body: { confirm: 'DELETE', profile_id: id } });
+      delBtn.disabled = false;
+      if (error || !data || !data.ok) {
+        let msg = 'Could not delete.';
+        try { const j = error && error.context ? await error.context.json() : null; if (j && j.error) msg = j.error; } catch (x) {}
+        return formSay(form, msg);
+      }
+      document.getElementById('member-modal').hidden = true;
+      await loadMembers();
+    });
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const fd = new FormData(form);
