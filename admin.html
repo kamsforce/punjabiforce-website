@@ -231,8 +231,12 @@
       <label><span class="lbl">Community</span>
         <input type="text" name="community" placeholder="e.g. Punjabiforce, SDG Jalandhar"></label>
       <div class="form-row">
-        <label><span class="lbl">Date and time (UK) <span class="req">*</span></span>
+        <label><span class="lbl">Starts (UK) <span class="req">*</span></span>
           <input type="datetime-local" name="event_datetime" required></label>
+        <label><span class="lbl">Ends (UK)</span>
+          <input type="datetime-local" name="event_end"></label>
+      </div>
+      <div class="form-row">
         <label><span class="lbl">Status <span class="req">*</span></span>
           <select name="status">
             <option value="planning">Coming soon</option>

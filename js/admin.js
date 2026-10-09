@@ -827,6 +827,7 @@
         form[k].value = e[k] || (k === 'status' ? 'planning' : k === 'where_type' ? 'in_person' : '');
       });
       form.event_datetime.value = toLocalInput(e.event_datetime);
+      form.event_end.value = e.event_end ? toLocalInput(e.event_end) : '';
       form.capacity.value = e.capacity == null ? '' : e.capacity;
     }
     modal.hidden = false;
@@ -839,6 +840,14 @@
 
     document.getElementById('new-event-btn')
       .addEventListener('click', () => openEventModal(null));
+
+    // Suggest an end time 2 hours after the start, if none is set yet
+    form.event_datetime.addEventListener('change', () => {
+      if (form.event_end.value || !form.event_datetime.value) return;
+      const d = new Date(form.event_datetime.value);
+      d.setHours(d.getHours() + 2);
+      form.event_end.value = toLocalInput(d.toISOString());
+    });
 
     modal.addEventListener('click', e => {
       if (e.target === modal || e.target.closest('[data-close-modal]')) modal.hidden = true;
@@ -856,10 +865,17 @@
       }
 
       const iso = new Date(v('event_datetime')).toISOString();
+      const endIso = v('event_end') ? new Date(v('event_end')).toISOString() : null;
+      if (endIso && endIso <= iso) {
+        status.textContent = 'The end time must be after the start time.';
+        status.className = 'form-status show error';
+        return;
+      }
       const row = {
         title: v('title'),
         community: v('community') || null,
         event_datetime: iso,
+        event_end: endIso,
         status: v('status'),
         where_type: v('where_type'),
         location: v('location') || null,
