@@ -102,6 +102,67 @@
 </section>
 </main>
 
+<div class="modal" id="booking-modal" hidden role="dialog" aria-modal="true" aria-labelledby="booking-title">
+  <div class="modal-card">
+
+    <div data-panel="confirm" hidden>
+      <h2 id="booking-title">Book your place</h2>
+      <p class="muted-note"><strong data-ev-title></strong><br><span data-ev-when></span></p>
+      <div class="form-status" role="status"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="button" data-confirm-book>Confirm booking &rarr;</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Not now</button>
+      </div>
+    </div>
+
+    <div data-panel="details" hidden>
+      <h2>Tell us a little about you</h2>
+      <p class="muted-note">First time booking with us. You only do this once.<br>
+        <strong data-ev-title></strong> &middot; <span data-ev-when></span></p>
+      <form class="contact-form" id="booking-details-form" novalidate>
+        <p class="booking-email">Signed in as <strong data-email></strong></p>
+        <div class="form-row">
+          <label><span class="lbl">First name <span class="req">*</span></span>
+            <input name="first_name" autocomplete="given-name" required></label>
+          <label><span class="lbl">Last name <span class="req">*</span></span>
+            <input name="last_name" autocomplete="family-name" required></label>
+        </div>
+        <label><span class="lbl">LinkedIn profile URL <span class="req">*</span></span>
+          <input name="linkedin_url" type="url" placeholder="https://www.linkedin.com/in/your-name" required></label>
+        <div class="form-row">
+          <label><span class="lbl">Job title</span>
+            <input name="title" autocomplete="organization-title"></label>
+          <label><span class="lbl">Company</span>
+            <input name="company" autocomplete="organization"></label>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="consent" required>
+          <span>I've read the <a href="policies.html" target="_blank">privacy policy</a> and agree to
+          Punjabiforce storing these details to manage my event bookings.</span>
+        </label>
+        <div class="form-status" role="status"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" type="submit">Book my place &rarr;</button>
+          <button class="btn btn-quiet" type="button" data-close-modal>Not now</button>
+        </div>
+      </form>
+    </div>
+
+    <div data-panel="done" hidden class="booking-done">
+      <div class="thanks-tick" aria-hidden="true">&#10003;</div>
+      <h2>You're booked!</h2>
+      <p class="muted-note"><strong data-ev-title></strong><br><span data-ev-when></span></p>
+      <p class="muted-note">We've emailed the details to <strong data-done-email></strong>.
+        Can't see it? Check your junk folder.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="button" data-ics>Add to calendar</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <footer class="site-footer">
   <div class="wrap">
     <div class="foot-top">
