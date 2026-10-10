@@ -361,7 +361,7 @@
     const { data } = await sb.from('eventspf')
       .select('id,title,event_datetime,capacity,registration_url')
       .order('event_datetime', { ascending: false });
-    attEvents = (data || []).filter(e => !e.registration_url);
+    attEvents = data || [];
 
     if (!attEvents.length) {
       sel.innerHTML = '<option value="">No events booked on this site yet</option>';
@@ -375,7 +375,8 @@
     const def = upcoming.length ? upcoming[upcoming.length - 1] : attEvents[0];
 
     sel.innerHTML = attEvents.map(e =>
-      '<option value="' + esc(e.id) + '">' + esc(fmt(e.event_datetime) + ' · ' + e.title) + '</option>').join('');
+      '<option value="' + esc(e.id) + '">' + esc(fmt(e.event_datetime) + ' · ' + e.title +
+        (e.registration_url ? ' (external booking)' : '')) + '</option>').join('');
     sel.value = keep && attEvents.some(e => e.id === keep) ? keep : def.id;
     await loadAttendees();
   }
@@ -384,14 +385,26 @@
     const id = document.getElementById('attendee-event').value;
     if (!id) return;
     const { data, error } = await sb.from('event_bookings')
-      .select('id,status,joining_as,booked_at,checked_in_at,profile_id,' +
-              'profiles(first_name,last_name,email,linkedin_url,title,company)')
+      .select('id,status,joining_as,booked_at,checked_in_at,profile_id,guest_id,imported,' +
+              'profiles(first_name,last_name,email,linkedin_url,title,company),' +
+              'guests(first_name,last_name,email,linkedin_url,title,company)')
       .eq('event_id', id);
     if (error) {
       document.getElementById('att-list').innerHTML = '<p class="muted-note">Could not load attendees.</p>';
       return;
     }
-    const name = r => r.profiles ? (r.profiles.first_name + ' ' + r.profiles.last_name) : '';
+    // One "person" object whether the booking is a member's or a guest's
+    (data || []).forEach(r => {
+      const p = r.profiles || r.guests || {};
+      r.person = {
+        first_name: p.first_name || '', last_name: p.last_name || '',
+        email: p.email || '', linkedin_url: p.linkedin_url || '',
+        title: p.title || '', company: p.company || ''
+      };
+      if (!r.person.first_name && !r.person.last_name) r.person.first_name = r.person.email;
+      r.isGuest = !!r.guest_id;
+    });
+    const name = r => (r.person.first_name + ' ' + r.person.last_name).trim();
     attRows = (data || []).sort((a, b) => name(a).localeCompare(name(b), 'en', { sensitivity: 'base' }));
     renderAttendees();
   }
@@ -412,8 +425,8 @@
     const show = attRows.filter(r => {
       if (attFilter === 'registered' && r.status === 'cancelled') return false;
       if (attFilter !== 'registered' && r.status !== attFilter) return false;
-      if (!q || !r.profiles) return true;
-      return [r.profiles.first_name, r.profiles.last_name, r.profiles.company].join(' ').toLowerCase().includes(q);
+      if (!q) return true;
+      return [r.person.first_name, r.person.last_name, r.person.company, r.person.email].join(' ').toLowerCase().includes(q);
     });
 
     const list = document.getElementById('att-list');
@@ -423,7 +436,7 @@
     }
 
     list.innerHTML = show.map(r => {
-      const p = r.profiles || {};
+      const p = r.person;
       const here = r.status === 'attended';
       const cancelled = r.status === 'cancelled';
       return '<div class="att-row' + (here ? ' is-here' : '') + (cancelled ? ' is-cancelled' : '') + '">' +
@@ -436,6 +449,7 @@
           '<span>' + esc([p.title, p.company].filter(Boolean).join(', ')) + '</span>' +
         '</div>' +
         '<div class="att-meta">' +
+          (r.isGuest ? '<span class="chip chip-guest" title="Imported, no account yet">Guest</span>' : '') +
           (r.joining_as !== 'attendee' ? '<span class="chip">' + esc(JOIN_LABEL[r.joining_as]) + '</span>' : '') +
           '<span class="pill pill-bk-' + esc(r.status) + '">' + esc(STATUS_LABEL[r.status]) + '</span>' +
           (p.linkedin_url ? '<a href="' + esc(p.linkedin_url) + '" target="_blank" rel="noopener" class="att-li" aria-label="LinkedIn">in</a>' : '') +
@@ -492,12 +506,13 @@
 
     const exportBtn = document.getElementById('att-export');
     if (exportBtn) exportBtn.addEventListener('click', exportCsv);
+    if (document.getElementById('att-import')) wireImport();
 
     /* Add an existing member to the event */
     const modal = document.getElementById('att-modal');
     const form = document.getElementById('att-form');
     document.getElementById('att-add').addEventListener('click', () => {
-      const booked = new Set(attRows.map(r => r.profile_id));
+      const booked = new Set(attRows.filter(r => r.profile_id).map(r => r.profile_id));
       form.reset();
       form.querySelector('.form-status').className = 'form-status';
       form.profile_id.innerHTML = '<option value="">Choose a member</option>' +
@@ -523,16 +538,140 @@
     });
   }
 
+
+  /* ---------------- import CSV (Admin) ---------------- */
+
+  /* Small CSV reader: handles quotes, commas and new lines inside quotes */
+  function parseCsv(text) {
+    const rows = []; let row = []; let cell = ''; let q = false;
+    text = text.replace(/^﻿/, '');
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') q = false;
+        else cell += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); rows.push(row); row = []; cell = '';
+      } else cell += c;
+    }
+    if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(r => r.some(x => x.trim() !== ''));
+  }
+
+  /* Match Eventbrite and common headings to our fields */
+  const HEADER_MAP = {
+    first_name: ['first name', 'firstname', 'first', 'given name', 'forename'],
+    last_name: ['last name', 'lastname', 'surname', 'family name', 'last'],
+    email: ['email', 'email address', 'e-mail', 'attendee email', 'buyer email'],
+    linkedin_url: ['linkedin', 'linkedin url', 'linkedin profile', 'linkedin profile url'],
+    title: ['job title', 'title', 'role', 'position'],
+    company: ['company', 'organisation', 'organization', 'employer', 'company name']
+  };
+
+  function mapRows(table) {
+    if (table.length < 2) return { rows: [], missing: ['data'], found: [] };
+    const head = table[0].map(h => h.trim().toLowerCase());
+    const col = {};
+    Object.entries(HEADER_MAP).forEach(([field, names]) => {
+      const i = head.findIndex(h => names.includes(h));
+      if (i >= 0) col[field] = i;
+    });
+    const missing = ['email'].filter(f => col[f] === undefined);
+    const rows = table.slice(1).map(r => {
+      const o = {};
+      Object.entries(col).forEach(([f, i]) => { o[f] = (r[i] || '').trim(); });
+      return o;
+    });
+    return { rows, missing, found: Object.keys(col) };
+  }
+
+  function wireImport() {
+    const modal = document.getElementById('import-modal');
+    const form = document.getElementById('import-form');
+    const preview = document.getElementById('import-preview');
+    const submit = form.querySelector('button[type="submit"]');
+    let parsed = [];
+
+    document.getElementById('att-import').addEventListener('click', () => {
+      const ev = attEvents.find(e => e.id === document.getElementById('attendee-event').value);
+      if (!ev) return alert('Choose an event first.');
+      form.reset();
+      parsed = [];
+      preview.innerHTML = '';
+      form.querySelector('.form-status').className = 'form-status';
+      document.getElementById('import-event').textContent = fmt(ev.event_datetime) + ' · ' + ev.title;
+      form.status.value = new Date(ev.event_datetime).getTime() < Date.now() ? 'attended' : 'booked';
+      submit.disabled = true;
+      modal.hidden = false;
+    });
+
+    form.file.addEventListener('change', async () => {
+      const f = form.file.files[0];
+      parsed = [];
+      submit.disabled = true;
+      form.querySelector('.form-status').className = 'form-status';
+      if (!f) { preview.innerHTML = ''; return; }
+      const m = mapRows(parseCsv(await f.text()));
+      if (m.missing.length) {
+        preview.innerHTML = '<p class="form-status show error">No <strong>Email</strong> column found. ' +
+          'The first row must be the headings, for example First Name, Last Name, Email.</p>';
+        return;
+      }
+      const ok = m.rows.filter(r => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email || ''));
+      const seen = new Set();
+      parsed = ok.filter(r => {
+        const k = r.email.toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      });
+      preview.innerHTML =
+        '<p><strong>' + parsed.length + '</strong> people ready to import' +
+        (m.rows.length - ok.length ? ', ' + (m.rows.length - ok.length) + ' rows without a valid email will be skipped' : '') +
+        (ok.length - parsed.length ? ', ' + (ok.length - parsed.length) + ' duplicate emails removed' : '') + '.</p>' +
+        '<p class="muted">Columns found: ' + esc(m.found.join(', ').replace(/_/g, ' ')) + '</p>' +
+        '<div class="import-sample">' + parsed.slice(0, 5).map(r =>
+          '<div>' + esc([r.first_name, r.last_name].filter(Boolean).join(' ') || '(no name)') +
+          ' <span class="muted">' + esc(r.email) + '</span></div>').join('') +
+        (parsed.length > 5 ? '<div class="muted">and ' + (parsed.length - 5) + ' more</div>' : '') + '</div>';
+      submit.disabled = !parsed.length;
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!parsed.length) return;
+      submit.disabled = true;
+      submit.textContent = 'Importing…';
+      const { data, error } = await sb.rpc('import_guests', {
+        p_event: document.getElementById('attendee-event').value,
+        p_rows: parsed,
+        p_status: form.status.value
+      });
+      submit.textContent = 'Import';
+      if (error) { submit.disabled = false; return formSay(form, 'Import failed: ' + error.message); }
+      const d = data || {};
+      formSay(form, 'Done. ' + (d.new_guests || 0) + ' new guests, ' + (d.known_guests || 0) +
+        ' guests already known, ' + (d.members || 0) + ' existing members, ' +
+        (d.already_on_event || 0) + ' already on this event' +
+        (d.skipped ? ', ' + d.skipped + ' skipped' : '') + '. No emails were sent.', true);
+      parsed = [];
+      await loadAttendees();
+    });
+  }
+
   function exportCsv() {
     const ev = attEvents.find(e => e.id === document.getElementById('attendee-event').value);
     if (!ev) return;
     const cell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     const lines = [['First name', 'Last name', 'Email', 'LinkedIn', 'Job title', 'Company',
-                    'Joining as', 'Status', 'Booked at', 'Checked in at'].map(cell).join(',')];
+                    'Type', 'Joining as', 'Status', 'Booked at', 'Checked in at'].map(cell).join(',')];
     attRows.forEach(r => {
-      const p = r.profiles || {};
+      const p = r.person;
       lines.push([p.first_name, p.last_name, p.email, p.linkedin_url, p.title, p.company,
-        JOIN_LABEL[r.joining_as], STATUS_LABEL[r.status], r.booked_at, r.checked_in_at].map(cell).join(','));
+        r.isGuest ? 'Guest' : 'Member', JOIN_LABEL[r.joining_as], STATUS_LABEL[r.status], r.booked_at, r.checked_in_at].map(cell).join(','));
     });
     const url = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv' }));
     const a = document.createElement('a');

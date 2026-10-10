@@ -101,6 +101,7 @@
       <div class="btn-row att-actions">
         <button class="btn btn-quiet" id="att-add">Add a member</button>
         <button class="btn btn-quiet" id="att-noshow">Mark the rest as no-show</button>
+        <button class="btn btn-quiet" id="att-import" data-admin-only>Import CSV</button>
         <button class="btn btn-quiet" id="att-export" data-admin-only>Export CSV</button>
       </div>
     </div>
@@ -215,6 +216,31 @@
       <div class="btn-row">
         <button class="btn btn-primary" type="submit">Add</button>
         <button class="btn btn-quiet" type="button" data-close-modal>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Import a list of attendees -->
+<div class="modal" id="import-modal" hidden data-admin-only>
+  <div class="modal-card">
+    <h2>Import attendees</h2>
+    <p class="muted-note"><strong id="import-event"></strong><br>
+      A CSV with a header row, for example an Eventbrite export. Only <strong>Email</strong> is required;
+      First Name, Last Name, Job Title, Company and LinkedIn are used if present.
+      People without an account are added as <strong>guests</strong>. <strong>Nobody is emailed.</strong></p>
+    <form class="contact-form" id="import-form" novalidate>
+      <label><span class="lbl">CSV file</span><input type="file" name="file" accept=".csv,text/csv"></label>
+      <label><span class="lbl">Mark everyone as</span>
+        <select name="status">
+          <option value="attended">Attended (past event)</option>
+          <option value="booked">Booked (upcoming event)</option>
+        </select></label>
+      <div id="import-preview"></div>
+      <p class="form-status" role="status"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" type="submit" disabled>Import</button>
+        <button class="btn btn-quiet" type="button" data-close-modal>Close</button>
       </div>
     </form>
   </div>

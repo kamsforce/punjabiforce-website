@@ -1303,3 +1303,11 @@ select:focus-visible {
 @media (max-width: 560px) {
   .dash-account .btn, .member-delete { width: 100%; justify-content: center; margin-left: 0; }
 }
+
+/* Guests and import */
+.chip-guest { background: rgba(254,156,8,0.16); color: #8a5a00; }
+#import-preview p { font-size: 14px; margin: 0 0 6px; }
+.import-sample {
+  font-size: 13.5px; background: var(--mist); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 14px; display: grid; gap: 4px;
+}

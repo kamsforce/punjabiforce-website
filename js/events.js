@@ -207,11 +207,23 @@
       fillEvent('details');
       modal.querySelector('[data-email]').textContent = session.user.email;
       show('details');
+      prefillFromGuest();
       return;
     }
     clearSay('confirm');
     fillEvent('confirm');
     show('confirm');
+  }
+
+  /* If we already know this email from an imported list, fill in what we have */
+  async function prefillFromGuest() {
+    const { data } = await sb.rpc('my_guest_details');
+    const g = Array.isArray(data) ? data[0] : data;
+    if (!g) return;
+    const form = modal.querySelector('#booking-details-form');
+    ['first_name', 'last_name', 'linkedin_url', 'title', 'company'].forEach(k => {
+      if (g[k] && !form[k].value) form[k].value = g[k];
+    });
   }
 
   async function book() {
