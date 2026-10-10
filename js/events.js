@@ -24,6 +24,10 @@
     timeZone: 'Europe/London', weekday: 'short', day: 'numeric',
     month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
+  /* "Thu, 15 Jan 2027, 18:00 to 21:00" when there is an end time */
+  const whenRange = e => when(e.event_datetime) + (e.event_end
+    ? ' to ' + new Date(e.event_end).toLocaleTimeString('en-GB',
+        { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' }) : '');
 
   /* Page state */
   let events = [];
@@ -64,14 +68,18 @@
 
     const b = mine[e.id];
     if (b && (b.status === 'booked' || b.status === 'attended')) {
-      return '<span class="booked-badge">You’re booked &#10003;</span>' +
+      const label = b.joining_as === 'volunteer' ? 'You’re volunteering &#10003;' : 'You’re booked &#10003;';
+      return '<span class="booked-badge">' + label + '</span>' +
         '<button class="btn btn-quiet" type="button" data-cancel="' + esc(e.id) + '">Cancel booking</button>';
     }
     const c = counts[e.id];
+    const isVolunteer = profile && (profile.roles || []).includes('volunteer');
+    const volunteerBtn = isVolunteer
+      ? '<button class="btn btn-quiet" type="button" data-volunteer="' + esc(e.id) + '">Volunteer at this event</button>' : '';
     if (c && c.places_left === 0) {
-      return '<button class="btn btn-quiet" type="button" disabled>Full</button>';
+      return '<button class="btn btn-quiet" type="button" disabled>Full</button>' + volunteerBtn;
     }
-    return '<button class="btn btn-primary" type="button" data-book="' + esc(e.id) + '">Book a place &rarr;</button>';
+    return '<button class="btn btn-primary" type="button" data-book="' + esc(e.id) + '">Book a place &rarr;</button>' + volunteerBtn;
   }
 
   function details(e, upcoming) {
@@ -92,7 +100,7 @@
   /* Upcoming: full-width list row */
   function row(e) {
     return '<article class="event-item" id="event-' + esc(e.id) + '">' +
-      '<div class="when">' + esc(when(e.event_datetime)) + '</div>' +
+      '<div class="when">' + esc(whenRange(e)) + '</div>' +
       '<div class="event-body">' + thumb(e) + '<div>' + details(e, true) + '</div></div>' +
     '</article>';
   }
@@ -153,6 +161,7 @@
   const modal = document.getElementById('booking-modal');
   const panels = modal ? modal.querySelectorAll('[data-panel]') : [];
   let current = null;   // event being booked
+  let joiningAs = 'attendee';
 
   function show(name) {
     panels.forEach(p => { p.hidden = p.dataset.panel !== name; });
@@ -176,14 +185,17 @@
     modal.querySelectorAll('[data-panel="' + scope + '"] [data-ev-title]')
       .forEach(el => { el.textContent = current.title; });
     modal.querySelectorAll('[data-panel="' + scope + '"] [data-ev-when]')
-      .forEach(el => { el.textContent = when(current.event_datetime) + ' (UK time)'; });
+      .forEach(el => { el.textContent = whenRange(current) + ' (UK time)'; });
   }
 
   /* ---------------- booking flow ---------------- */
 
-  async function startBooking(eventId) {
+  async function startBooking(eventId, asVolunteer) {
     current = events.find(e => e.id === eventId);
     if (!current) return;
+    joiningAs = asVolunteer ? 'volunteer' : 'attendee';
+    const t = document.getElementById('booking-title');
+    if (t) t.textContent = asVolunteer ? 'Volunteer at this event' : 'Book your place';
 
     if (!session) {
       const back = 'events.html?book=' + encodeURIComponent(eventId);
@@ -195,6 +207,7 @@
       fillEvent('details');
       modal.querySelector('[data-email]').textContent = session.user.email;
       show('details');
+      prefillFromGuest();
       return;
     }
     clearSay('confirm');
@@ -202,11 +215,22 @@
     show('confirm');
   }
 
+  /* If we already know this email from an imported list, fill in what we have */
+  async function prefillFromGuest() {
+    const { data } = await sb.rpc('my_guest_details');
+    const g = Array.isArray(data) ? data[0] : data;
+    if (!g) return;
+    const form = modal.querySelector('#booking-details-form');
+    ['first_name', 'last_name', 'linkedin_url', 'title', 'company'].forEach(k => {
+      if (g[k] && !form[k].value) form[k].value = g[k];
+    });
+  }
+
   async function book() {
     const existing = mine[current.id];
     const q = existing
       ? sb.from('event_bookings').update({ status: 'booked' }).eq('id', existing.id)
-      : sb.from('event_bookings').insert({ event_id: current.id, profile_id: session.user.id });
+      : sb.from('event_bookings').insert({ event_id: current.id, profile_id: session.user.id, joining_as: joiningAs });
     const { error } = await q;
     if (error) {
       console.error('Booking error:', error);
@@ -250,7 +274,8 @@
   function downloadIcs() {
     if (!current) return;
     const start = new Date(current.event_datetime);
-    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+    const end = current.event_end ? new Date(current.event_end)
+      : new Date(start.getTime() + 2 * 60 * 60 * 1000);
     const f = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     const where = current.where_type === 'virtual' ? 'Online' : (current.location || 'In person');
     const clean = s => String(s || '').replace(/[\;,]/g, m => '\\' + m).replace(/\r?\n/g, '\\n');
@@ -385,6 +410,8 @@
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-book]');
     if (b) { startBooking(b.dataset.book); return; }
+    const v = e.target.closest('[data-volunteer]');
+    if (v) { startBooking(v.dataset.volunteer, true); return; }
     const c = e.target.closest('[data-cancel]');
     if (c) cancelBooking(c.dataset.cancel, c);
   });

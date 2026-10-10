@@ -77,6 +77,12 @@
         return say('That email is not set up as a member yet. If you have not ' +
                    'joined, please use the join form first.', false);
       }
+      if (error.status === 504 || msg.includes('timeout') || msg.includes('deadline')) {
+        // The email is often still on its way: let them enter the code anyway.
+        showCodeForm(email);
+        return codeSay('Our email service was slow. Your code should arrive within a minute or two. ' +
+                       'If more than one email arrives, use the code in the newest one.', false);
+      }
       if (msg.includes('rate') || msg.includes('limit') || error.status === 429) {
         return say('Too many sign-in emails have been sent recently. Supabase ' +
                    'limits this on the free plan. Wait an hour and try again.', false);
@@ -144,8 +150,12 @@
 
       if (error) {
         console.error('Code error:', error);
-        return codeSay('That code did not work. It may have expired or already been used. ' +
-                       'Use a different email to request a new one.', false);
+        const m = (error.message || '').toLowerCase();
+        if (m.includes('expired') || m.includes('invalid')) {
+          return codeSay('That code has expired or was replaced by a newer one. Check for a newer ' +
+                         'email and use its code, or click "Use a different email" to request a fresh code.', false);
+        }
+        return codeSay('That code did not work. Please try again in a moment.', false);
       }
 
       const next = safeNext();
