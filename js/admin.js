@@ -569,7 +569,9 @@
     email: ['email', 'email address', 'e-mail', 'attendee email', 'buyer email'],
     linkedin_url: ['linkedin', 'linkedin url', 'linkedin profile', 'linkedin profile url'],
     title: ['job title', 'title', 'role', 'position'],
-    company: ['company', 'organisation', 'organization', 'employer', 'company name']
+    company: ['company', 'organisation', 'organization', 'employer', 'company name'],
+    city: ['city', 'town', 'town/city', 'city/town'],
+    country: ['country', 'country/region']
   };
 
   function mapRows(table) {
